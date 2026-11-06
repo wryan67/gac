@@ -18,10 +18,11 @@ if ($api === 'suggest') {
 
 if ($api === 'counters') {
     $campaignId = (int) ($_GET['campaign'] ?? 0);
+    $ship = ($_GET['kind'] ?? '') === 'ship';
     $layoutStmt = $pdo->prepare('SELECT layout FROM campaigns WHERE id = ?');
     $layoutStmt->execute([$campaignId]);
     json_out([
-        'suggestions' => counter_history($pdo, trim((string) ($_GET['opponent'] ?? '')), (string) $layoutStmt->fetchColumn()),
+        'suggestions' => counter_history($pdo, trim((string) ($_GET['opponent'] ?? '')), (string) $layoutStmt->fetchColumn(), $ship),
     ]);
 }
 
@@ -358,7 +359,7 @@ function squad_save(PDO $pdo): void
     $layoutStmt->execute([$campaignId]);
     json_out([
         'ok' => true,
-        'suggestions' => counter_history($pdo, $opponent, (string) $layoutStmt->fetchColumn()),
+        'suggestions' => counter_history($pdo, $opponent, (string) $layoutStmt->fetchColumn(), $ship),
     ]);
 }
 

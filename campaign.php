@@ -538,7 +538,8 @@ $('.squad').each(function () {
         $.getJSON('api.php', {
             api: 'counters',
             campaign: CAMPAIGN_ID,
-            opponent: field(squad, 'opponent').val()
+            opponent: field(squad, 'opponent').val(),
+            kind: squad.data('kind')
         }, function (res) {
             renderSuggestions(squad, (res && res.suggestions) || []);
         });

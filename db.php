@@ -434,22 +434,39 @@ function unit_allowed(PDO $pdo, string $name, bool $ship): bool
     return (bool) $stmt->fetchColumn();
 }
 
-function counter_history(PDO $pdo, string $opponent, string $layout): array
+function counter_history(PDO $pdo, string $opponent, string $layout, bool $ship = false): array
 {
-    if ($opponent === '' || ($layout !== '5v5' && $layout !== '3v3')) {
+    if ($opponent === '') {
         return [];
     }
-    $stmt = $pdo->prepare(
-        'SELECT s.counter AS name, COUNT(*) AS n
-         FROM squads s
-         JOIN campaigns c ON c.id = s.campaign_id
-         WHERE s.opponent = ? AND s.result = \'success\' AND s.counter <> \'\'
-           AND c.layout = ?
-         GROUP BY s.counter
-         ORDER BY n DESC, s.counter COLLATE NOCASE
-         LIMIT 3'
-    );
-    $stmt->execute([$opponent, $layout]);
+    // Fleet fights are the same in every league and format, so ship counters
+    // come from every campaign. Character counters stay inside one layout.
+    if ($ship) {
+        $stmt = $pdo->prepare(
+            'SELECT s.counter AS name, COUNT(*) AS n
+             FROM squads s
+             WHERE s.zone = \'tr\' AND s.opponent = ? AND s.result = \'success\' AND s.counter <> \'\'
+             GROUP BY s.counter
+             ORDER BY n DESC, s.counter COLLATE NOCASE
+             LIMIT 3'
+        );
+        $stmt->execute([$opponent]);
+    } else {
+        if ($layout !== '5v5' && $layout !== '3v3') {
+            return [];
+        }
+        $stmt = $pdo->prepare(
+            'SELECT s.counter AS name, COUNT(*) AS n
+             FROM squads s
+             JOIN campaigns c ON c.id = s.campaign_id
+             WHERE s.zone <> \'tr\' AND s.opponent = ? AND s.result = \'success\' AND s.counter <> \'\'
+               AND c.layout = ?
+             GROUP BY s.counter
+             ORDER BY n DESC, s.counter COLLATE NOCASE
+             LIMIT 3'
+        );
+        $stmt->execute([$opponent, $layout]);
+    }
     $rows = [];
     foreach ($stmt->fetchAll() as $row) {
         $rows[] = ['name' => $row['name'], 'count' => (int) $row['n']];
