@@ -288,7 +288,7 @@ function zone_plan(string $skill, string $layout): array
         'kyber|5v5' => ['tl' => 4, 'bl' => 4, 'tr' => 3, 'br' => 3],
         'kyber|3v3' => ['tl' => 5, 'bl' => 5, 'tr' => 3, 'br' => 5],
         'aurodium|5v5' => ['tl' => 3, 'bl' => 3, 'tr' => 3, 'br' => 3],
-        'aurodium|3v3' => ['tl' => 4, 'bl' => 4, 'tr' => 3, 'br' => 4],
+        'aurodium|3v3' => ['tl' => 4, 'bl' => 4, 'tr' => 2, 'br' => 5],
     ];
     return $plans[$skill . '|' . $layout] ?? [];
 }

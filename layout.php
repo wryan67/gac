@@ -89,9 +89,11 @@ function page_open(string $title, string $active): void
     .squad-table .result-group > .btn { float: none; padding: 4px 8px; line-height: 1.2; }
     .hist-portrait { width: 32px; height: 32px; }
     .hist-pick {
-        display: inline-block; padding: 0; border: 0; background: transparent;
-        line-height: 0; cursor: pointer; border-radius: 4px;
+        display: inline-flex; align-items: center; gap: 4px;
+        padding: 0; border: 0; background: transparent;
+        line-height: 1; cursor: pointer; border-radius: 4px; color: inherit;
     }
+    .hist-wins { font-weight: 700; font-size: 13px; font-variant-numeric: tabular-nums; }
     .hist-pick:focus { outline: 2px solid #0089ea; outline-offset: 1px; }
     .squad-error { margin: 4px 0 0; }
     .lookup-wrap { position: relative; }

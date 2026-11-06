@@ -271,13 +271,14 @@ function renderSuggestions(squad, suggestions) {
         var item = field(squad, 'opponent').val() ? suggestions[i] : null;
         if (!item) return;
         var button = $('<button type="button" class="hist-pick"></button>');
-        button.attr('aria-label', item.name);
+        button.attr('aria-label', item.name + ', ' + item.count + (item.count === 1 ? ' win' : ' wins'));
         button.append($('<img>', {
             'class': 'roster-img hist-portrait',
             alt: item.name,
             src: 'portrait.php?kind=' + encodeURIComponent(kind) +
                 '&name=' + encodeURIComponent(item.name)
         }));
+        button.append($('<span class="hist-wins"></span>').text(item.count));
         button.on('click', function () {
             var input = field(squad, 'counter');
             input.val(item.name);
@@ -290,7 +291,15 @@ function renderSuggestions(squad, suggestions) {
 
 var portraitTip = $('<div class="portrait-tip" hidden><img alt=""><div class="portrait-tip-name"></div></div>');
 var portraitTipTimer = null;
+var portraitTipHideTimer = null;
+var portraitTipAnchor = null;
+var portraitTipIgnore = null;
 $('body').append(portraitTip);
+
+function iosDevice() {
+    return /iPad|iPhone|iPod/.test(navigator.userAgent)
+        || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+}
 
 function placePortraitTip(anchor) {
     var tip = portraitTip[0];
@@ -328,13 +337,30 @@ function showPortraitTip(slot) {
     tipImg.attr('alt', name);
     if (tipImg.attr('src') !== img.attr('src')) tipImg.attr('src', img.attr('src'));
     portraitTip.removeAttr('hidden');
+    portraitTipAnchor = slot[0];
+    portraitTip.css('pointer-events', iosDevice() ? 'auto' : 'none');
     placePortraitTip(slot);
     if (!tipImg[0].complete) tipImg.one('load', function () { placePortraitTip(slot); });
+    clearTimeout(portraitTipHideTimer);
+    portraitTipHideTimer = null;
+    if (iosDevice()) {
+        portraitTipHideTimer = setTimeout(function () {
+            portraitTipHideTimer = null;
+            portraitTip.attr('hidden', 'hidden');
+            portraitTipAnchor = null;
+        }, 10000);
+    }
 }
 
 $(document).on('mouseenter', '.opponent-photo, .counter-photo, .hist-pick', function () {
+    if (portraitTipIgnore === this) {
+        portraitTipIgnore = null;
+        return;
+    }
     var slot = $(this);
     clearTimeout(portraitTipTimer);
+    clearTimeout(portraitTipHideTimer);
+    portraitTipHideTimer = null;
     portraitTip.attr('hidden', 'hidden');
     portraitTipTimer = setTimeout(function () {
         portraitTipTimer = null;
@@ -342,8 +368,36 @@ $(document).on('mouseenter', '.opponent-photo, .counter-photo, .hist-pick', func
     }, 333);
 });
 $(document).on('mouseleave', '.opponent-photo, .counter-photo, .hist-pick', function () {
+    if (iosDevice()) return;
     clearTimeout(portraitTipTimer);
+    clearTimeout(portraitTipHideTimer);
     portraitTipTimer = null;
+    portraitTipHideTimer = null;
+    portraitTipAnchor = null;
+    portraitTip.attr('hidden', 'hidden');
+});
+$(document).on('touchstart', function (event) {
+    if (!iosDevice() || portraitTip[0].hidden) return;
+    var touch = event.originalEvent.touches && event.originalEvent.touches[0];
+    if (!touch) return;
+    var rect = portraitTip[0].getBoundingClientRect();
+    if (touch.clientX >= rect.left && touch.clientX <= rect.right &&
+        touch.clientY >= rect.top && touch.clientY <= rect.bottom) {
+        return;
+    }
+    var portrait = $(event.target).closest('.opponent-photo, .counter-photo, .hist-pick')[0];
+    if (portrait && portrait !== portraitTipAnchor) return;
+    portraitTipIgnore = portrait || null;
+    if (portrait) {
+        setTimeout(function () {
+            if (portraitTipIgnore === portrait) portraitTipIgnore = null;
+        }, 700);
+    }
+    clearTimeout(portraitTipTimer);
+    clearTimeout(portraitTipHideTimer);
+    portraitTipTimer = null;
+    portraitTipHideTimer = null;
+    portraitTipAnchor = null;
     portraitTip.attr('hidden', 'hidden');
 });
 
