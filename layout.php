@@ -169,6 +169,8 @@ function page_open(string $title, string $active): void
       <ul class="nav navbar-nav">
         <li class="<?= $active === 'campaigns' ? 'active' : '' ?>">
           <a href="index.php"><i class="fa-solid fa-flag"></i> Campaigns</a></li>
+        <li class="<?= $active === 'adhoc' ? 'active' : '' ?>">
+          <a href="adhoc.php"><i class="fa-solid fa-bolt"></i> Adhoc</a></li>
         <li class="<?= $active === 'characters' ? 'active' : '' ?>">
           <a href="roster.php?kind=characters"><i class="fa-solid fa-user"></i> Characters</a></li>
         <li class="<?= $active === 'ships' ? 'active' : '' ?>">
@@ -206,6 +208,24 @@ function page_close(): void
 <script src="assets/vendor/js/jquery.min.js"></script>
 <script src="assets/vendor/js/bootstrap.min.js"></script>
 <script src="assets/vendor/js/jquery.bootgrid.min.js"></script>
+<script>
+// iPad Safari does not follow positive tabindex once another button sits between
+// the fields, so Tab is handled here in that same opponent-then-counter order.
+$(document).on('keydown', '.squad .opponent, .squad .counter', function (e) {
+    if (e.key !== 'Tab' && e.keyCode !== 9) return;
+    var fields = $('.squad .opponent, .squad .counter').get().filter(function (el) {
+        return el.tabIndex > 0;
+    }).sort(function (a, b) {
+        return a.tabIndex - b.tabIndex;
+    });
+    var index = fields.indexOf(this);
+    if (index < 0) return;
+    var next = fields[index + (e.shiftKey ? -1 : 1)];
+    if (!next) return;
+    e.preventDefault();
+    setTimeout(function () { next.focus(); }, 0);
+});
+</script>
 <script>
 (function () {
     var pending = null;

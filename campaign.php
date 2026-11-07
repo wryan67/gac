@@ -270,7 +270,7 @@ function renderSuggestions(squad, suggestions) {
         var cell = $(this).empty();
         var item = field(squad, 'opponent').val() ? suggestions[i] : null;
         if (!item) return;
-        var button = $('<button type="button" class="hist-pick"></button>');
+        var button = $('<button type="button" class="hist-pick" tabindex="-1"></button>');
         button.attr('aria-label', item.name + ', ' + item.count + (item.count === 1 ? ' win' : ' wins'));
         button.append($('<img>', {
             'class': 'roster-img hist-portrait',

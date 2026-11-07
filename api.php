@@ -17,12 +17,16 @@ if ($api === 'suggest') {
 }
 
 if ($api === 'counters') {
-    $campaignId = (int) ($_GET['campaign'] ?? 0);
     $ship = ($_GET['kind'] ?? '') === 'ship';
-    $layoutStmt = $pdo->prepare('SELECT layout FROM campaigns WHERE id = ?');
-    $layoutStmt->execute([$campaignId]);
+    $layout = (string) ($_GET['layout'] ?? '');
+    if (!$ship && $layout !== '5v5' && $layout !== '3v3') {
+        $campaignId = (int) ($_GET['campaign'] ?? 0);
+        $layoutStmt = $pdo->prepare('SELECT layout FROM campaigns WHERE id = ?');
+        $layoutStmt->execute([$campaignId]);
+        $layout = (string) $layoutStmt->fetchColumn();
+    }
     json_out([
-        'suggestions' => counter_history($pdo, trim((string) ($_GET['opponent'] ?? '')), (string) $layoutStmt->fetchColumn(), $ship),
+        'suggestions' => counter_history($pdo, trim((string) ($_GET['opponent'] ?? '')), $layout, $ship),
     ]);
 }
 
