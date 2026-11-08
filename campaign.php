@@ -67,7 +67,7 @@ page_open('Campaign', 'campaigns');
       </div>
     </div>
     <div class="panel-body">
-      <div class="board">
+      <form class="board" autocomplete="off" onsubmit="return false;">
         <?php
         $tabSquads = 0;
         foreach (['tl', 'bl', 'br', 'tr'] as $zone) {
@@ -143,13 +143,13 @@ page_open('Campaign', 'campaigns');
                       </td>
                       <td class="result-cell">
                         <div class="btn-group result-group">
-                          <button type="button" class="btn btn-default<?= $result === '' ? ' active' : '' ?>" data-result="" title="Unknown">
+                          <button type="button" class="btn btn-default<?= $result === '' ? ' active' : '' ?>" data-result="" title="Unknown" tabindex="-1">
                             <i class="fa-solid fa-question"></i>
                           </button>
-                          <button type="button" class="btn btn-default<?= $result === 'success' ? ' active' : '' ?>" data-result="success" title="Success">
+                          <button type="button" class="btn btn-default<?= $result === 'success' ? ' active' : '' ?>" data-result="success" title="Success" tabindex="-1">
                             <i class="fa-solid fa-check"></i>
                           </button>
-                          <button type="button" class="btn btn-default<?= $result === 'fail' ? ' active' : '' ?>" data-result="fail" title="Fail">
+                          <button type="button" class="btn btn-default<?= $result === 'fail' ? ' active' : '' ?>" data-result="fail" title="Fail" tabindex="-1">
                             <i class="fa-solid fa-xmark"></i>
                           </button>
                         </div>
@@ -160,7 +160,7 @@ page_open('Campaign', 'campaigns');
             </table>
           </section>
         <?php endforeach; ?>
-      </div>
+      </form>
     </div>
   </div>
 <?php page_close(); ?>
@@ -230,7 +230,7 @@ function attachLookup(input) {
         $.getJSON('api.php', { api: 'suggest', kind: kind, q: q }, function (res) {
             menu.empty();
             $.each(res.matches || [], function (_, match) {
-                var button = $('<button type="button" class="lookup-item"></button>');
+                var button = $('<button type="button" class="lookup-item" tabindex="-1"></button>');
                 button.data('name', match.name);
                 button.append($('<img>', {
                     alt: '',

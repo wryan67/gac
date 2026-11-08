@@ -5,7 +5,11 @@ require __DIR__ . '/layout.php';
 
 require_login();
 $token = csrf_token();
-$dates = db()->query('SELECT DISTINCT date FROM campaigns ORDER BY date DESC')->fetchAll(PDO::FETCH_COLUMN);
+$pdo = db();
+$dates = $pdo->query('SELECT DISTINCT date FROM campaigns ORDER BY date DESC')->fetchAll(PDO::FETCH_COLUMN);
+$latest = $pdo->query('SELECT layout, skill FROM campaigns ORDER BY date DESC, id DESC LIMIT 1')->fetch() ?: [];
+$defaultLayout = ($latest['layout'] ?? '') === '3v3' ? '3v3' : '5v5';
+$defaultSkill = ($latest['skill'] ?? '') === 'aurodium' ? 'aurodium' : 'kyber';
 session_write_close();
 
 page_open('Campaigns', 'campaigns');
@@ -56,15 +60,15 @@ page_open('Campaigns', 'campaigns');
           <div class="form-group">
             <label>Layout</label>
             <div>
-              <label class="radio-inline"><input type="radio" name="newLayout" value="5v5" checked> 5v5</label>
-              <label class="radio-inline"><input type="radio" name="newLayout" value="3v3"> 3v3</label>
+              <label class="radio-inline"><input type="radio" name="newLayout" value="5v5"<?= $defaultLayout === '5v5' ? ' checked' : '' ?>> 5v5</label>
+              <label class="radio-inline"><input type="radio" name="newLayout" value="3v3"<?= $defaultLayout === '3v3' ? ' checked' : '' ?>> 3v3</label>
             </div>
           </div>
           <div class="form-group">
             <label>Skill level</label>
             <div>
-              <label class="radio-inline"><input type="radio" name="newSkill" value="kyber" checked> Kyber</label>
-              <label class="radio-inline"><input type="radio" name="newSkill" value="aurodium"> Aurodium</label>
+              <label class="radio-inline"><input type="radio" name="newSkill" value="kyber"<?= $defaultSkill === 'kyber' ? ' checked' : '' ?>> Kyber</label>
+              <label class="radio-inline"><input type="radio" name="newSkill" value="aurodium"<?= $defaultSkill === 'aurodium' ? ' checked' : '' ?>> Aurodium</label>
             </div>
           </div>
           <div class="form-group">
@@ -97,6 +101,8 @@ page_open('Campaigns', 'campaigns');
 <?php page_close(); ?>
 <script>
 var CSRF = <?= json_encode($token) ?>;
+var defaultLayout = <?= json_encode($defaultLayout) ?>;
+var defaultSkill = <?= json_encode($defaultSkill) ?>;
 var layoutFilter = '';
 var skillFilter = '';
 
@@ -168,6 +174,8 @@ function todayIso() {
 $('#addCampaign').on('click', function () {
     $('#campaignError').hide();
     $('#campaignDate').val(todayIso());
+    $('input[name=newLayout][value="' + defaultLayout + '"]').prop('checked', true);
+    $('input[name=newSkill][value="' + defaultSkill + '"]').prop('checked', true);
     $('#campaignModal').modal('show');
 });
 

@@ -15,7 +15,7 @@ page_open('Adhoc counter', 'adhoc');
       <h3 class="page-title">Adhoc counter</h3>
     </div>
     <div class="panel-body">
-      <div class="board">
+      <form class="board" autocomplete="off" onsubmit="return false;">
         <?php
         $rows = [
             ['label' => 'Squad', 'kind' => 'character'],
@@ -74,7 +74,7 @@ page_open('Adhoc counter', 'adhoc');
             </table>
           </section>
         <?php endforeach; ?>
-      </div>
+      </form>
     </div>
   </div>
 <?php page_close(); ?>
@@ -198,7 +198,7 @@ function attachLookup(input) {
         $.getJSON('api.php', { api: 'suggest', kind: kind, q: q }, function (res) {
             menu.empty();
             $.each(res.matches || [], function (_, match) {
-                var button = $('<button type="button" class="lookup-item"></button>');
+                var button = $('<button type="button" class="lookup-item" tabindex="-1"></button>');
                 button.data('name', match.name);
                 button.append($('<img>', {
                     alt: '',
